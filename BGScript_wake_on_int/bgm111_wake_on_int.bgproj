@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<project device="bgm111">
+
+	<!-- GATT service database -->
+	<gatt in="wake_on_int_gatt.xml" />
+	
+	<!-- Local hardware configuration file -->
+    <hardware in="wake_on_int_hardware.xml" />
+    
+	<!-- BGScript source code -->
+	<scripting>
+		<script in="bgm111_wake_on_int.bgs" />
+	</scripting>
+	
+	<!-- Firmware output file -->
+	<image out="bgm111_wake_on_int.bin" />
+   
+</project>

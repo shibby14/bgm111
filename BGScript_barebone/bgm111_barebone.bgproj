@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<project device="bgm111">
+
+	<!-- GATT service database -->
+	<gatt in="barebone_gatt.xml" />
+	
+	<!-- Local hardware configuration file -->
+    <hardware in="barebone_hardware.xml" />
+    
+	<!-- BGScript source code -->
+	<scripting>
+		<script in="bgm111_barebone.bgs" />
+	</scripting>
+	
+	<!-- Firmware output file -->
+	<image out="bgm111_barebone.bin" />
+   
+</project>

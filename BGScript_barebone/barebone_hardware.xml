@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<hardware>
+	<sleep enable="true" />	
+	
+    <gpio port="C" pin="8" mode="pushpull" out="1"/>
+    <gpio port="C" pin="6" mode="pushpull" out="1"/>
+	
+	<ctune value="0" />
+</hardware>
+

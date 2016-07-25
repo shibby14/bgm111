@@ -1,0 +1,4 @@
+xgatt_command_byte 8
+xgatt_custom_string 10
+xgatt_temperature 14
+xgatt_accelerometer 18

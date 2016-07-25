@@ -1,0 +1,124 @@
+
+## SPI bitbang functions. Tested that this works with the BMA280 acceleration sensor IC 
+## on the BGM111 devkit extension board.
+## ** FOR TESTING ONLY** 
+
+# SPI pins: (all in same bank C)
+const spi_bank      = 2
+
+#<!-- SPI bitbanging PIN PC9 = SPI_CS  -->
+const spi_cs_mask = $200    
+
+#<!-- SPI bitbanging PIN PC8 = SPI_SCK -->
+const spi_sck_mask  = $100
+    
+#<!-- SPI bitbanging PIN PC7 = SPI_MISO  -->
+const spi_miso_mask  = $80
+
+#<!-- SPI bitbanging PIN PC6 = SPI_MOSI  -->
+const spi_mosi_mask  = $40
+
+# variables for SPI bitbanging
+dim spi_data_out
+export dim spi_data_in
+dim spi_counter
+
+
+dim read_result
+dim res
+
+export procedure spi_read(address)
+
+    spi_counter = 0
+    spi_data_in = 0
+    spi_data_out = $8000 # 1 = read, address = 0 = chip ID  
+    
+    spi_data_out = spi_data_out | (address << 8)
+    
+    # drive CS low
+    call hardware_write_gpio(spi_bank, spi_cs_mask, $00)
+    
+    # do the SPI transfer...
+    while spi_counter < 16 
+    
+        # set data output, on falling edge
+        if (spi_data_out & $8000) > 0 then
+            call hardware_write_gpio(spi_bank, spi_mosi_mask, spi_mosi_mask) # bit 1
+        else
+            call hardware_write_gpio(spi_bank, spi_mosi_mask, $00) # bit 0
+        end if
+        spi_data_out = spi_data_out << 1
+        
+        call hardware_write_gpio(spi_bank, spi_sck_mask, $00) # SCK falling edge
+        
+        # some delay needed here? probably not
+        
+        call hardware_write_gpio(spi_bank, spi_sck_mask, spi_sck_mask) # SCK rising edge
+    
+        # sample incoming data after the rising edge
+        
+        spi_data_in = spi_data_in << 1 
+        
+        call hardware_read_gpio(spi_bank, spi_miso_mask)(res, read_result)
+        if read_result > 0 then
+            spi_data_in = spi_data_in | 1 
+        end if 
+        
+        
+        spi_counter = spi_counter + 1
+    end while
+        
+    spi_data_in = spi_data_in & $ff 
+    
+    # drive CS high
+    call hardware_write_gpio(spi_bank, spi_cs_mask, spi_cs_mask)
+    
+end # procedure spi_read
+
+export procedure spi_write(address, value)
+
+    spi_counter = 0
+    spi_data_in = 0
+    spi_data_out = $0000 # 0 = write, address = 0 
+    
+    spi_data_out = spi_data_out | (address << 8)    
+    spi_data_out = spi_data_out | (value & $ff)
+    
+    # drive CS low
+    call hardware_write_gpio(spi_bank, spi_cs_mask, $00)
+    
+    # do the SPI transfer...
+    while spi_counter < 16 
+    
+        # set data output, on falling edge
+        if (spi_data_out & $8000) > 0 then
+            call hardware_write_gpio(spi_bank, spi_mosi_mask, spi_mosi_mask) # bit 1
+        else
+            call hardware_write_gpio(spi_bank, spi_mosi_mask, $00) # bit 0
+        end if
+        spi_data_out = spi_data_out << 1
+        
+        call hardware_write_gpio(spi_bank, spi_sck_mask, $00) # SCK falling edge
+        
+        # no need to add extra delay between falling and rising edge of the clock, because BGScript
+        # execuction delay will include enough delay in itself. 
+        
+        call hardware_write_gpio(spi_bank, spi_sck_mask, spi_sck_mask) # SCK rising edge
+    
+        # sample incoming data after the rising edge
+        
+        spi_data_in = spi_data_in << 1 
+        
+        call hardware_read_gpio(spi_bank, spi_miso_mask)(res, read_result)
+        if read_result > 0 then
+            spi_data_in = spi_data_in | 1 
+        end if 
+        
+        
+        spi_counter = spi_counter + 1
+    end while
+        
+    # drive CS high
+    call hardware_write_gpio(spi_bank, spi_cs_mask, spi_cs_mask)
+    
+end #procedure spi_write

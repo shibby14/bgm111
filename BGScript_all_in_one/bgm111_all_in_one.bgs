@@ -1,0 +1,193 @@
+# ================================================================
+# BGScript demo: Factory demo script
+# ----------------------------------------------------------------
+# CHANGELOG:
+#   
+# ====================== CONSTANTS ===============================
+
+const endpoint_uart1   = 2
+
+# ====================== VARIABLES ===============================
+
+dim command
+dim led
+dim timer_en
+dim pb1_btn
+dim pb0_btn
+dim vlen
+dim res
+dim vdata
+dim tmp(5)
+dim temp_en
+dim acc_en
+dim accm_samples(3)
+dim string_len
+dim string_data
+
+# ======================= IMPORTS ================================
+
+import "peripheral.bgs" 
+import "spi_bitbang.bgs"
+
+# ================================================================
+
+procedure init_acceleration_sens()
+	# INT_A register sets orientation int settings
+	#call spi_write($2c, $80)
+	
+	# Set INT_MAP_0 to map INT1 pin to orientation mode
+	call spi_write($19, $40)
+	
+	# Set INT_RST_LATCH register to reset interrupt to go low after 1s
+	call spi_write($21, $03)
+	
+	# Set INT_EN_0 register to enable orientation interrupt
+	call spi_write($16, $40)
+end
+
+# Boot event
+event system_boot(major,minor,patch,build,bootloader,hw)
+	
+	timer_en = 0
+	temp_en = 0
+	acc_en = 0
+	led = 0
+	
+	call init_acceleration_sens()
+
+	# Set advertisement interval to 100ms, use all three ADV channels
+	call le_gap_set_adv_parameters(160,160,7)
+	
+	# Start Bluetooth LE advertisements and enable connections
+	call le_gap_set_mode(2,2)
+end 
+
+# XOR the onboard LED0 to make it blink 
+procedure handle_led()
+	
+	if led then
+		call hardware_write_gpio(5,$40,$00)
+	else
+		call hardware_write_gpio(5,$40,$40)
+	end if
+end
+
+# This event is generated when the local data base values are changed by GATT client 
+event gatt_server_attribute_value(connection,characteristic,att_opcode,offset,value_le,value)	
+	if characteristic = xgatt_command_byte then
+		command=value(0:1)	
+		
+		temp_en = 0
+		timer_en = 0
+		acc_en = 0
+		
+		if command=0 then
+			# turn off led
+			led = 0
+		end if
+		
+		if	command=1 then
+			# turn on led
+			led = 1
+		end if
+		
+		if command=2 then
+			# blink 
+			timer_en = 1			
+			call hardware_set_soft_timer($2000,0,0)
+		end if
+		
+		if command=3 then
+			#temp
+			temp_en = 1
+			timer_en = 1
+			call hardware_set_soft_timer($4096,0,0)
+		end if
+		
+		if command=4 then
+			#accelerometer
+			acc_en = 1
+			timer_en = 1
+			call endpoint_send(endpoint_uart1, 26, "Initiating accelerometer\r\n")
+			call hardware_set_soft_timer($2000,0,0)
+		end if
+	end if	
+	
+	if timer_en = 0 then
+		call hardware_set_soft_timer(0,0,0)
+	end if
+	
+	call handle_led()
+end
+
+# Software timer event - generated when software timer runs out
+event hardware_soft_timer(handle)
+	if (handle = 1)
+		call hardware_write_gpio(5,$80,$80)
+	else	
+		if (temp_en)
+			call read_i2c()
+			
+			# Build HTM service's temperature reading characteristic
+			# Set flags for Celsius temperature
+			tmp(0:1)=0
+			# Convert the value to float
+			tmp(1:4)=float(data*1757/65536-469, -1)
+			
+			# Write attribute to local GATT data base Temperature Measurement attribute
+			call gatt_server_write_attribute_value(xgatt_temperature,0,5,tmp(0:5))(result)
+			
+			# Send indication to all "listening" clients 
+			# 0xFF as connection ID will send indications to all connections
+			call gatt_server_send_characteristic_notification($ff, xgatt_temperature,5,tmp(0:5))(result)
+		end if
+		
+		if (acc_en)
+			call spi_read($03) # read X axis value MSB part
+			accm_samples(0:1) = spi_data_in & $ff
+		 
+			call spi_read($05) # read Y axis value MSB part
+			accm_samples(1:1)= spi_data_in & $ff
+		
+			call spi_read($07) # read Z axis value MSB part
+			accm_samples(2:1) = spi_data_in & $ff
+			
+			call gatt_server_write_attribute_value(xgatt_accelerometer,0,3,accm_samples(0:3))(result)
+			call gatt_server_send_characteristic_notification($ff, xgatt_accelerometer,3,accm_samples(0:3))(result)
+			
+			# Print values to UART
+			#call endpoint_send(endpoint_uart1, 2, "X:")
+			#call util_itoa(accm_samples(0:1))(string_len, string_data)		
+			#call endpoint_send(endpoint_uart1, string_len, string_data)
+			#call endpoint_send(endpoint_uart1, 3, " Y:")
+			#call util_itoa(accm_samples(1:1))(string_len, string_data)		
+			#call endpoint_send(endpoint_uart1, string_len, string_data)
+			#call endpoint_send(endpoint_uart1, 3, " Z:")
+			#call util_itoa(accm_samples(2:1))(string_len, string_data)		
+			#call endpoint_send(endpoint_uart1, string_len, string_data)
+			#call endpoint_send(endpoint_uart1, 3, "\r\n\n")
+		end if
+		
+		led = led ^ 1
+		call handle_led()
+	end if
+end
+
+event hardware_interrupt(interrupts,timestamp)
+	call hardware_write_gpio(5,$80,$00)
+	call hardware_set_soft_timer($2000,1,1)
+end
+
+
+# Disconnect event listener - generated when BLE connection is closed
+event le_connection_closed(reason,connection)
+
+	timer_en = 0
+	temp_en = 0
+	acc_en = 0
+	led = 0
+	
+	# Restart advertisement
+	call le_gap_set_mode(2,2)
+	
+end

@@ -1,0 +1,22 @@
+# ================================================================
+# BGScript: Barebone sketch to monitor power consumption.
+#
+#			Average current is 133uA 
+#			For some reason setting 2 GPIOs on C port gives lowest 
+#			current draw.
+# ----------------------------------------------------------------
+# CHANGELOG:
+#   
+# ================================================================
+
+# Variable definitions
+
+
+# ======================= IMPORTS ================================
+
+
+# ================================================================
+
+event system_boot(major,minor,patch,build,bootloader,hw)
+	
+end 

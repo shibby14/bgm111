@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<hardware>
+
+	<!-- UART configuration -->
+	<!-- Settings: @9600bps, no RTS/CTS and BGAPI serial protocol is disabled -->
+	<uart index="1" baud="9600" flowcontrol="false" bgapi="false"/>
+	
+	<!-- I2C configuration -->
+	<!-- Settings: SCL pin is PC11 and SDA pin is PC10 -->
+	<i2c scl_pin="PC11" sda_pin="PC10"/>
+	
+	<!-- out="1" gives a logical 0 -->
+	<gpio port="F" pin="6" mode="pushpull" out="1"/>
+	<gpio port="F" pin="7" mode="pushpull" out="1"/>
+
+	<sleep enable="true" />	
+	<!-- <wake_up port="F" pin="7" state="down" /> -->
+	
+	<!-- SPI bitbanging PIN PC9 = SPI_CS  -->
+    <gpio port="C" pin="9" mode="pushpull" out="1"/>
+
+    <!-- SPI bitbanging PIN PC8 = SPI_SCK -->
+    <gpio port="C" pin="8" mode="pushpull" out="1"/>
+    
+    <!-- SPI bitbanging PIN PC7 = SPI_MISO  -->
+    <gpio port="C" pin="7" mode="input" out="0"/>
+
+    <!-- SPI bitbanging PIN PC6 = SPI_MOSI  -->
+    <gpio port="C" pin="6" mode="pushpull" out="1"/>
+	
+	<!-- BMA280 INT pin -->
+	<gpio port="F" pin="5" mode="input" out="0" interrupt="rising"/>
+	
+	<!-- ctune parameter. For BGM111 V1=0, V1.1=270, V2=270. For BGM113=260 -->
+	<ctune value="0" />
+</hardware>
+

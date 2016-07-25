@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+	
+<gatt>
+	
+	<!-- Generic Access Service -->
+	<service uuid="1800">
+		<!-- Device name -->
+		<characteristic uuid="2a00">
+			<properties read="true" write="true" />
+			<value>BGM demo 1</value>
+		</characteristic>
+		<!-- Appearances -->
+		<characteristic uuid="2a01">
+			<properties read="true" const="true" />
+			<value type="hex">300</value>
+		</characteristic>
+	</service>
+
+	<!-- Custom Service -->
+	<service uuid="0c2594ca-f588-11e5-9ce9-5e5517507c66">
+		<!-- Custom Control Characteristic -->
+		<characteristic uuid="0c25989e-f588-11e5-9ce9-5e5517507c66" id="xgatt_command_byte">
+			<properties read="true" write="true" />
+			<value type="hex" length="1">0</value>
+		</characteristic>
+		<!-- Custom Notify Characteristic -->
+		<characteristic uuid="7ca50b6a-f58b-11e5-9ce9-5e5517507c66" id="xgatt_custom_string">
+			<description>Custom Notification Characteristic</description>
+			<properties notify="true" />
+			<value type="hex">0</value>
+		</characteristic>
+		<!-- Temp Notify Characteristic -->
+		<characteristic uuid="306403c2-3f97-11e6-beb8-9e71128cae77" id="xgatt_temperature">
+			<description>Temperature Notification Characteristic</description>
+			<properties notify="true" read="true" />
+			<value>0</value>
+		</characteristic>
+		<!-- Temp Notify Characteristic -->
+		<characteristic uuid="97bd05ee-4ce1-11e6-beb8-9e71128cae77" id="xgatt_accelerometer">
+			<description>Accelerometer Notification Characteristic</description>
+			<properties notify="true" read="true" />
+			<value>0</value>
+		</characteristic>
+	</service>
+
+</gatt>
