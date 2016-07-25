@@ -2,8 +2,9 @@
 # BGScript: Barebone sketch to monitor power consumption.
 #
 #			Average current is 133uA 
-#			For some reason setting 2 GPIOs on C port gives lowest 
-#			current draw.
+#			When expansion board is attached setting ACC SPI pins
+#			(C port)lowers current consumption by ~350uA. No exp 
+#			board average current draw is 1,75uA.
 # ----------------------------------------------------------------
 # CHANGELOG:
 #   

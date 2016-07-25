@@ -2,6 +2,7 @@
 
 <hardware>
 	<sleep enable="true" />	
+	<wake_up port="F" pin="7" state="down" />
 	
     <gpio port="C" pin="8" mode="pushpull" out="1"/>
     <gpio port="C" pin="6" mode="pushpull" out="1"/>
