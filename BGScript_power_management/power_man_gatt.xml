@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+	
+<gatt>
+	
+	<!-- Generic Access Service -->
+	<service uuid="1800">
+		<!-- Device name -->
+		<characteristic uuid="2a00">
+			<properties read="true" write="true" />
+			<value>BGM111 power</value>
+		</characteristic>
+		<!-- Appearances -->
+		<characteristic uuid="2a01">
+			<properties read="true" const="true" />
+			<value type="hex">300</value>
+		</characteristic>
+	</service>
+
+	<!-- Custom Service -->
+	<service uuid="36831314-5019-11e6-beb8-9e71128cae77">
+		<!-- Battery level Notify Characteristic -->
+		<characteristic uuid="7ca50b6a-f58b-11e5-9ce9-5e5517507c66" id="xgatt_batt_power">
+			<description>Battery level Notification Characteristic</description>
+			<properties notify="true" />
+			<value>0</value>
+		</characteristic>
+	</service>
+
+</gatt>

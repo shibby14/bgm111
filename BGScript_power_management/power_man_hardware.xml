@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<hardware>
+
+	<sleep enable="true" />
+	
+	<!-- Enable ADC in order to read BATT voltage -->
+	<adc enable="true" />
+	
+	<!-- out="1" gives a logical 0 -->
+	<gpio port="F" pin="6" mode="pushpull" out="1"/>
+	<gpio port="F" pin="7" mode="pushpull" out="1"/>
+	
+	<!-- ctune parameter. For BGM111 V1=0, V1.1=270, V2=270. For BGM113=260 -->
+	<ctune value="0" />
+</hardware>
+

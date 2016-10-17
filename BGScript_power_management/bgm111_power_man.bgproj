@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<project device="bgm111">
+
+	<!-- GATT service database -->
+	<gatt in="power_man_gatt.xml" />
+	
+	<!-- Local hardware configuration file -->
+    <hardware in="power_man_hardware.xml" />
+    
+	<!-- BGScript source code -->
+	<scripting>
+		<script in="bgm111_power_man.bgs" />
+	</scripting>
+	
+	<!-- Firmware output file -->
+	<image out="bgm111_power_man.bin" />
+   
+</project>

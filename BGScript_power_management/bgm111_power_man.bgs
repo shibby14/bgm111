@@ -1,0 +1,57 @@
+# ================================================================
+# BGScript:	Example sketch for getting VDD voltage, for i.e.
+#			monitoring bettery level. 
+# ----------------------------------------------------------------
+# CHANGELOG:
+#   
+# ====================== VARIABLES ===============================
+
+dim adc_raw
+dim adc_mV
+
+dim result
+dim data
+
+dim con_id
+ 
+# ================================================================
+
+
+# Boot event
+event system_boot(major,minor,patch,build,bootloader,hw)		
+	# Set ADC reference to 5V
+	call hardware_config_adc_reference(hardware_adc_reference_5vdiff)(result)
+	
+	# Reoccurring 1s-timer for reading ADC
+	call hardware_set_soft_timer($8000,0,0)
+	
+	# Set advertisement interval to 100ms, use all three ADV channels
+	call le_gap_set_adv_parameters(160,160,7)	
+	
+	# Start Bluetooth LE advertisements and enable connections
+	call le_gap_set_mode(2,2)
+end 
+
+# Fires when connection is opened
+event le_connection_opened(address,address_type,master,connection,bonding)
+	# Save connection for future reference
+	con_id = connection
+end
+
+# Software timer event - generated when software timer runs out
+event hardware_soft_timer(handle)
+	if (handle = 0)	
+		# Read 12bit ADC value of the AVDD and convert it to mV
+		call hardware_read_adc_channel(hardware_adc_channel_avdd)(result, adc_raw)
+		adc_mV = adc_raw * 5000 / 4096
+		
+		# Send notifications to all clients 
+		call gatt_server_send_characteristic_notification($ff, xgatt_batt_power,2,adc_mV)(result)		
+	end if
+end
+
+# Disconnect event listener - generated when BLE connection is closed
+event le_connection_closed(reason,connection)
+	# Restart advertisement
+	call le_gap_set_mode(2,2)	
+end

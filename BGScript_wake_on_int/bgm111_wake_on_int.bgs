@@ -78,6 +78,7 @@ end
 # XOR the onboard LED0 to make it blink 
 procedure handle_led()
 	if led
+		# MOVE FIRST LINE TO BOOT EVENT
 		call hardware_read_gpio(5,$40)(result,data)
 		data = data ^ $40
 		call hardware_write_gpio(5,$40,data)
@@ -131,10 +132,6 @@ event gatt_server_attribute_value(connection,characteristic,att_opcode,offset,va
 		end if
 	end if	
 	
-	if timer_en = 0 then
-		call hardware_set_soft_timer(0,0,0)
-	end if
-	
 	call handle_led()
 end
 
@@ -161,20 +158,23 @@ event hardware_soft_timer(handle)
 			call gatt_server_write_attribute_value(xgatt_temperature,0,5,tmp(0:5))(result)
 			
 			# Send indication to all "listening" clients 
-			# 0xFF as connection ID will send indications to all connections
 			call gatt_server_send_characteristic_notification($ff, xgatt_temperature,5,tmp(0:5))(result)
 		end if
 		
 		if (acc_en)
-			call spi_read($03) # read X axis value MSB part
+			# Read X axis value MSB part
+			call spi_read($03)
 			accm_samples(0:1) = spi_data_in & $ff
 		 
-			call spi_read($05) # read Y axis value MSB part
+			# Read Y axis value MSB part
+			call spi_read($05)
 			accm_samples(1:1)= spi_data_in & $ff
 		
-			call spi_read($07) # read Z axis value MSB part
+			# Read Z axis value MSB part
+			call spi_read($07) 
 			accm_samples(2:1) = spi_data_in & $ff
 			
+			# Write to GATT and notify all clients
 			call gatt_server_write_attribute_value(xgatt_accelerometer,0,3,accm_samples(0:3))(result)
 			call gatt_server_send_characteristic_notification($ff, xgatt_accelerometer,3,accm_samples(0:3))(result)
 			
@@ -192,6 +192,11 @@ event hardware_soft_timer(handle)
 		end if
 		
 		call handle_led()
+	end if
+	
+	# Turn off timer0 (main application timer)
+	if (timer_en = 0) then
+		call hardware_set_soft_timer(0,0,0)
 	end if
 end
 
@@ -218,6 +223,7 @@ end
 # Disconnect event listener - generated when BLE connection is closed
 event le_connection_closed(reason,connection)
 
+	# Turn off all active peripherals&timers
 	timer_en = 0
 	temp_en = 0
 	acc_en = 0

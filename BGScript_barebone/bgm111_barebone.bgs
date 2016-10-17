@@ -1,7 +1,7 @@
 # ================================================================
 # BGScript: Barebone sketch to monitor power consumption.
 #
-#			Average current is 133uA 
+#			Average current is 133uA (BMA280 is powered on) 
 #			When expansion board is attached setting ACC SPI pins
 #			(C port)lowers current consumption by ~350uA. No exp 
 #			board average current draw is 1,75uA.
@@ -10,14 +10,5 @@
 #   
 # ================================================================
 
-# Variable definitions
-
-
-# ======================= IMPORTS ================================
-
-
-# ================================================================
-
 event system_boot(major,minor,patch,build,bootloader,hw)
-	
 end 
