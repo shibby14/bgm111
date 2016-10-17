@@ -8,6 +8,8 @@ All of the examples are written in BGScript (bgm-1.0.4-1073 sdk) and uploaded to
 
 - <i>barebone</i> has no functionality and is meant to illustrate minimal power consumption, and be a base for new projects.
 
-- <i>wake_on_int</i> builds on <i>all_in_one</i> and adds an interrupt (orioentation int from BMA280 accelerometer) that wakes the module and makes it advertise for 5 seconds. If no connection is established within that time period the modules goes back to sleep and waits for a new interrupt.
+- <i>wake_on_int</i> builds on <i>all_in_one</i> and adds an interrupt (orientation int from BMA280 accelerometer) that wakes the module and makes it advertise for 5 seconds. If no connection is established within that time period the modules goes back to sleep and waits for a new interrupt.
+
+- <i>power_management</i> gets VDD voltage level (battery voltage) by comparing it to internal 5V ref voltage in the inbuilt 12bit ADC.
 
 
